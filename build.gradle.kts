@@ -126,11 +126,13 @@ publishing {
 
 signing {
     // Use in-memory ASCII-armored keys from environment variables
+    val signingKeyId = providers.environmentVariable("PGP_SIGNING_KEY_ID")
     val signingKey = providers.environmentVariable("PGP_SIGNING_KEY")
     val signingPassword = providers.environmentVariable("PGP_SIGNING_KEY_PASSPHRASE")
 
     if (signingKey.isPresent && signingPassword.isPresent) {
-        useInMemoryPgpKeys(signingKey.get(), signingPassword.get())
+        // Key ID required when signing with a subkey
+        useInMemoryPgpKeys(signingKeyId.orNull, signingKey.get(), signingPassword.get())
         sign(publishing.publications)
     } else {
         tasks.withType<Sign>().configureEach { enabled = false }
