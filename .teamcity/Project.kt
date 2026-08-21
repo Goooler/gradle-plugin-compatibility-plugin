@@ -141,6 +141,7 @@ object PublishToPluginPortal : AbstractBuildType({
     }
 
     params {
+        param("env.PGP_SIGNING_KEY_ID", "%pgpSigningKeyId%")
         param("env.PGP_SIGNING_KEY", "%pgpSigningKey%")
         password("env.PGP_SIGNING_KEY_PASSPHRASE", "%pgpSigningPassphrase%")
 
@@ -174,6 +175,7 @@ object ReleaseSnapshot : AbstractBuildType({
     }
 
     params {
+        param("env.PGP_SIGNING_KEY_ID", "%pgpSigningKeyId%")
         param("env.PGP_SIGNING_KEY", "%pgpSigningKey%")
         password("env.PGP_SIGNING_KEY_PASSPHRASE", "%pgpSigningPassphrase%")
 
