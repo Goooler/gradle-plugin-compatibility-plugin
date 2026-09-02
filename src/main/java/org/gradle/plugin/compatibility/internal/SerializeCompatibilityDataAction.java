@@ -36,7 +36,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -84,9 +84,15 @@ public abstract class SerializeCompatibilityDataAction implements Action<Task> {
     }
 
     private static Provider<Map<String, String>> compatibilityAsMap(CompatibleFeatures features) {
-        return toSupportLevel(features.getConfigurationCache()).map(
-            configurationCache -> Collections.singletonMap("configurationCache", configurationCache)
-        );
+        return toSupportLevel(features.getConfigurationCache())
+            .zip(
+                toSupportLevel(features.getIsolatedProjects()),
+                (configurationCache, isolatedProjects) -> {
+                    Map<String, String> featureMap = new HashMap<>();
+                    featureMap.put("configurationCache", configurationCache);
+                    featureMap.put("isolatedProjects", isolatedProjects);
+                    return featureMap;
+                });
     }
 
     @Override
@@ -104,6 +110,11 @@ public abstract class SerializeCompatibilityDataAction implements Action<Task> {
                 writer,
                 CompatibilityDeclarationProtocol.FEATURE_CONFIGURATION_CACHE,
                 features.getConfigurationCache()
+            );
+            writeFeatureSupportLevel(
+                writer,
+                CompatibilityDeclarationProtocol.FEATURE_ISOLATED_PROJECTS,
+                features.getIsolatedProjects()
             );
         } catch (IOException ex) {
             throw new GradleException("Failed to write supported features to " + propertiesFile, ex);

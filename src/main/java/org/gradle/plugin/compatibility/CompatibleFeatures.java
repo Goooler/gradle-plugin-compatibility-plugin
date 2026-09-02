@@ -41,4 +41,22 @@ public abstract class CompatibleFeatures {
     @Input
     @Optional
     public abstract Property<Boolean> getConfigurationCache();
+
+    /**
+     * Defines the compatibility with the Isolated Projects. The Isolated Projects feature is in the pre-alpha state,
+     * so the compatibility target isn't yet defined. Therefore, we do not recommend declaring the
+     * compatibility/incompatibility for published plugins.
+     * <p>
+     * Due to internal limitations, the value must be computable at configuration time. In particular, it cannot be
+     * derived from a task output.
+     *
+     * @return the Property object
+     * @since 1.1.0
+     * @deprecated Do not use in production yet.
+     */
+    @Input
+    @Optional
+    @Deprecated
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    public abstract Property<Boolean> getIsolatedProjects();
 }

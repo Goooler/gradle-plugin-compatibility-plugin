@@ -44,15 +44,26 @@ class FeatureCombinationsTest extends CompatibilityTestBase {
 
     @ParameterizedTest
     @CsvSource({
-        "true,      DECLARED_SUPPORTED",
-        "false,     DECLARED_UNSUPPORTED",
-        "undefined, UNDECLARED",
+        "true,      true,      DECLARED_SUPPORTED,   DECLARED_SUPPORTED",
+        "true,      false,     DECLARED_SUPPORTED,   DECLARED_UNSUPPORTED",
+        "false,     true,      DECLARED_UNSUPPORTED, DECLARED_SUPPORTED",
+        "false,     false,     DECLARED_UNSUPPORTED, DECLARED_UNSUPPORTED",
+        "true,      undefined, DECLARED_SUPPORTED,   UNDECLARED",
+        "false,     undefined, DECLARED_UNSUPPORTED, UNDECLARED",
+        "undefined, true,      UNDECLARED,           DECLARED_SUPPORTED",
+        "undefined, false,     UNDECLARED,           DECLARED_UNSUPPORTED",
+        "undefined, undefined, UNDECLARED,           UNDECLARED"
     })
     @DisplayName("All feature combinations including undefined")
-    void testAllFeatureCombinations(String ccValue, String expectedCc) throws IOException {
+    void testAllFeatureCombinations(
+        String ccValue,
+        String ipValue,
+        String expectedCc,
+        String expectedIp) throws IOException {
+
         withSettingsFile();
 
-        String featuresBlock = buildFeaturesBlock(ccValue);
+        String featuresBlock = buildFeaturesBlock(ccValue, ipValue);
 
         withKotlinBuildScript("""
             import org.gradle.plugin.compatibility.compatibility
@@ -78,13 +89,17 @@ class FeatureCombinationsTest extends CompatibilityTestBase {
 
         assertPluginDescriptor("org.gradle.test.plugin")
             .hasImplementationClass("org.gradle.plugin.TestPlugin")
-            .hasConfigurationCache(expectedCc);
+            .hasConfigurationCache(expectedCc)
+            .hasIsolatedProjects(expectedIp);
     }
 
-    private String buildFeaturesBlock(String cc) {
+    private String buildFeaturesBlock(String cc, String ip) {
         StringBuilder sb = new StringBuilder("features {\n");
         if (!"undefined".equals(cc)) {
             sb.append("                configurationCache.set(").append(cc).append(")\n");
+        }
+        if (!"undefined".equals(ip)) {
+            sb.append("                isolatedProjects.set(").append(ip).append(")\n");
         }
         sb.append("            }");
         return sb.toString();
