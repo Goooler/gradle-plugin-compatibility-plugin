@@ -22,6 +22,8 @@ import jetbrains.buildServer.configs.kotlin.buildFeatures.PullRequests
 import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
 import jetbrains.buildServer.configs.kotlin.buildFeatures.pullRequests
 import jetbrains.buildServer.configs.kotlin.buildSteps.gradle
+import jetbrains.buildServer.configs.kotlin.projectFeatures.UntrustedBuildsSettings
+import jetbrains.buildServer.configs.kotlin.projectFeatures.untrustedBuildsSettings
 import jetbrains.buildServer.configs.kotlin.triggers.vcs
 
 private val vcsRoot = AbsoluteId("GradlePluginCompatibilityPlugin")
@@ -30,6 +32,15 @@ object Project : Project({
     buildType(Verify)
     buildType(PublishToPluginPortal)
     buildType(ReleaseSnapshot)
+
+    features {
+        untrustedBuildsSettings {
+            id = "UntrustedBuilds"
+            defaultAction = UntrustedBuildsSettings.DefaultAction.APPROVE
+            manualRunsApproved = true
+            enableLog = true
+        }
+    }
 
     params {
          param("env.DEVELOCITY_ACCESS_KEY", "!awssm://teamcity/gradle-plugin-compatibility-plugin/_all/DEVELOCITY_ACCESS_KEY")
@@ -113,7 +124,7 @@ object Verify : AbstractBuildType({
             vcsRootExtId = vcsRoot.absoluteId
             provider = github {
                 authType = vcsRoot()
-                filterAuthorRole = PullRequests.GitHubRoleFilter.MEMBER
+                filterAuthorRole = PullRequests.GitHubRoleFilter.EVERYBODY
                 ignoreDrafts = true
             }
         }
