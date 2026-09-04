@@ -46,14 +46,19 @@ class LegacyGroovySyntaxCompatibilityTest extends CompatibilityTestBase {
     @ParameterizedTest
     @DisplayName("can apply features with legacy syntax")
     @CsvSource({
-        "configurationCache = true, " + SUPPORTED,
-        "configurationCache = false, " + UNSUPPORTED,
-        "''," + UNDECLARED, // configuration omitted
-        "configurationCache = project.provider { null as Boolean }, " + UNDECLARED, // unset provider
-        "configurationCache = project.provider { true }, " + SUPPORTED,
-        "configurationCache = project.provider { false }, " + UNSUPPORTED,
+        "configurationCache = true, " + SUPPORTED + ", " + UNDECLARED,
+        "configurationCache = false, " + UNSUPPORTED + ", " + UNDECLARED,
+        "''," + UNDECLARED + ", " + UNDECLARED, // configuration omitted
+        "configurationCache = project.provider { null as Boolean }, " + UNDECLARED + ", " + UNDECLARED, // unset provider
+        "configurationCache = project.provider { true }, " + SUPPORTED + ", " + UNDECLARED,
+        "configurationCache = project.provider { false }, " + UNSUPPORTED + ", " + UNDECLARED,
+        "isolatedProjects = true, " + UNDECLARED + ", " + SUPPORTED,
+        "isolatedProjects = false, " + UNDECLARED + ", " + UNSUPPORTED,
+        "isolatedProjects = project.provider { null as Boolean }, " + UNDECLARED + ", " + UNDECLARED, // unset provider
+        "isolatedProjects = project.provider { true }, " + UNDECLARED + ", " + SUPPORTED,
+        "isolatedProjects = project.provider { false }, " + UNDECLARED + ", " + UNSUPPORTED,
     })
-    void legacySyntaxOnlyConfigurationCache(String configurationLine, String expectedStatus) throws IOException {
+    void legacySyntaxFeatureConfiguration(String configurationLine, String expectedCc, String expectedIp) throws IOException {
         withSettingsFile();
         withGroovyBuildScript("""
             gradlePlugin {
@@ -77,7 +82,8 @@ class LegacyGroovySyntaxCompatibilityTest extends CompatibilityTestBase {
         assertThat(result.getOutput()).contains("BUILD SUCCESSFUL");
         assertPluginDescriptor("org.gradle.test.plugin")
             .hasImplementationClass("org.gradle.plugin.TestPlugin")
-            .hasConfigurationCache(expectedStatus);
+            .hasConfigurationCache(expectedCc)
+            .hasIsolatedProjects(expectedIp);
     }
 
     @Test
@@ -100,6 +106,7 @@ class LegacyGroovySyntaxCompatibilityTest extends CompatibilityTestBase {
                         compatibility(it) {
                             features {
                                 configurationCache = false
+                                isolatedProjects = true
                             }
                         }
                     }
@@ -114,6 +121,7 @@ class LegacyGroovySyntaxCompatibilityTest extends CompatibilityTestBase {
         // named() block should override create() block
         assertPluginDescriptor("org.gradle.test.plugin")
             .hasImplementationClass("org.gradle.plugin.TestPlugin")
-            .hasConfigurationCache(UNSUPPORTED);
+            .hasConfigurationCache(UNSUPPORTED)
+            .hasIsolatedProjects(SUPPORTED);
     }
 }

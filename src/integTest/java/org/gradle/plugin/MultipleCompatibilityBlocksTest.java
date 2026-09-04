@@ -95,6 +95,7 @@ class MultipleCompatibilityBlocksTest {
                             compatibility(it) {
                                 features {
                                     configurationCache = true
+                                    isolatedProjects = true
                                 }
                             }
                         }
@@ -114,9 +115,10 @@ class MultipleCompatibilityBlocksTest {
 
             assertThat(result.getOutput()).contains("BUILD SUCCESSFUL");
 
-            // named() block wins for configurationCache
+            // named() block wins for configurationCache, isolatedProjects from create() is preserved
             assertPluginDescriptor("org.gradle.test.plugin")
-                .hasConfigurationCache(UNSUPPORTED);
+                .hasConfigurationCache(UNSUPPORTED)
+                .hasIsolatedProjects(SUPPORTED);
         }
     }
 
@@ -180,6 +182,7 @@ class MultipleCompatibilityBlocksTest {
                             compatibility {
                                 features {
                                     configurationCache = true
+                                    isolatedProjects = true
                                 }
                             }
                         }
@@ -201,7 +204,8 @@ class MultipleCompatibilityBlocksTest {
 
             // named() block wins for configurationCache, isolatedProjects from create() is preserved
             assertPluginDescriptor("org.gradle.test.plugin")
-                .hasConfigurationCache(UNSUPPORTED);
+                .hasConfigurationCache(UNSUPPORTED)
+                .hasIsolatedProjects(SUPPORTED);
         }
 
         @Test

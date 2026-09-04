@@ -41,4 +41,21 @@ public abstract class CompatibleFeatures {
     @Input
     @Optional
     public abstract Property<Boolean> getConfigurationCache();
+
+    /**
+     * Defines the compatibility with Isolated Projects.
+     * <p>
+     * Due to internal limitations, the value must be computable at configuration time. In particular, it cannot be
+     * derived from a task output.
+     * <p>
+     * The Isolated Projects feature is incubating and not yet recommended for production use.
+     * Declaring compatibility indicates that the plugin works with {@code org.gradle.isolated-projects=true}
+     * on the Gradle versions it supports.
+     *
+     * @return the Property object
+     * @since 1.1.0
+     */
+    @Input
+    @Optional
+    public abstract Property<Boolean> getIsolatedProjects();
 }

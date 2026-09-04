@@ -60,6 +60,9 @@ class TaskUpToDateTest extends CompatibilityTestBase {
                                 configurationCache.set(
                                     providers.systemProperty("enable-cc").map { it.toBoolean() }
                                 )
+                                isolatedProjects.set(
+                                    providers.systemProperty("enable-ip").map { it.toBoolean() }
+                                )
                             }
                         }
                     }
@@ -83,7 +86,8 @@ class TaskUpToDateTest extends CompatibilityTestBase {
                 .isIn(TaskOutcome.SUCCESS, TaskOutcome.UP_TO_DATE));
 
         assertPluginDescriptor("org.gradle.test.plugin")
-            .hasConfigurationCache(SUPPORTED);
+            .hasConfigurationCache(SUPPORTED)
+            .hasIsolatedProjects(UNDECLARED);
 
         // Second run with same property value - task should be up to date
         var secondRun = runGradle("jar", "-Denable-cc=true");
@@ -96,7 +100,8 @@ class TaskUpToDateTest extends CompatibilityTestBase {
                 .isEqualTo(TaskOutcome.UP_TO_DATE));
 
         assertPluginDescriptor("org.gradle.test.plugin")
-            .hasConfigurationCache(SUPPORTED);
+            .hasConfigurationCache(SUPPORTED)
+            .hasIsolatedProjects(UNDECLARED);
     }
 
     @Test
@@ -138,10 +143,10 @@ class TaskUpToDateTest extends CompatibilityTestBase {
             .hasConfigurationCache(UNSUPPORTED);
 
         // Fourth run - the property changed back to undefined
-        runGradle("jar");
+        var fourthRun = runGradle("jar");
 
-        assertThat(thirdRun.getOutput()).contains("BUILD SUCCESSFUL");
-        assertThat(thirdRun.task(":pluginDescriptors"))
+        assertThat(fourthRun.getOutput()).contains("BUILD SUCCESSFUL");
+        assertThat(fourthRun.task(":pluginDescriptors"))
             .isNotNull()
             .satisfies(task -> assertThat(task.getOutcome())
                 .as("Task should be re-executed when property value changes back")
@@ -150,5 +155,32 @@ class TaskUpToDateTest extends CompatibilityTestBase {
         // Descriptor should be updated
         assertPluginDescriptor("org.gradle.test.plugin")
             .hasConfigurationCache(UNDECLARED);
+    }
+
+    @Test
+    @DisplayName("Task stays up-to-date when multiple property values do not change")
+    void taskStaysUpToDateWithMultipleProperties() {
+        // First run with both properties set
+        var firstRun = runGradle("jar", "-Denable-cc=true", "-Denable-ip=true");
+
+        assertThat(firstRun.getOutput()).contains("BUILD SUCCESSFUL");
+        assertPluginDescriptor("org.gradle.test.plugin")
+            .hasConfigurationCache(SUPPORTED)
+            .hasIsolatedProjects(SUPPORTED);
+
+        // Second run with same property values - task should be up to date
+        var secondRun = runGradle("jar", "-Denable-cc=true", "-Denable-ip=true");
+
+        assertThat(secondRun.getOutput()).contains("BUILD SUCCESSFUL");
+        assertThat(secondRun.task(":pluginDescriptors"))
+            .isNotNull()
+            .satisfies(task -> assertThat(task.getOutcome())
+                .as("Task should be UP-TO-DATE when property values haven't changed")
+                .isEqualTo(TaskOutcome.UP_TO_DATE));
+
+        // Descriptors should still have correct values
+        assertPluginDescriptor("org.gradle.test.plugin")
+            .hasConfigurationCache(SUPPORTED)
+            .hasIsolatedProjects(SUPPORTED);
     }
 }
