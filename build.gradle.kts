@@ -16,6 +16,8 @@
 
 import net.ltgt.gradle.errorprone.errorprone
 import net.ltgt.gradle.nullaway.nullaway
+import org.gradle.api.credentials.HttpHeaderCredentials
+import org.gradle.authentication.http.HttpHeaderAuthentication
 import org.gradle.plugin.compatibility.compatibility
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
@@ -111,13 +113,15 @@ publishing {
 
             url = stagingRepoUrl.get()
 
-            var usernameProvider = providers.environmentVariable("GRADLE_INTERNAL_REPO_USERNAME")
-            var passwordProvider = providers.environmentVariable("GRADLE_INTERNAL_REPO_PASSWORD")
+            val tokenProvider = providers.environmentVariable("GRADLE_INTERNAL_REPO_TOKEN")
 
-            if (usernameProvider.isPresent && passwordProvider.isPresent) {
-                credentials {
-                    username = usernameProvider.get()
-                    password = passwordProvider.get()
+            if (tokenProvider.isPresent) {
+                credentials(HttpHeaderCredentials::class) {
+                    name = "Authorization"
+                    value = "Bearer ${tokenProvider.get()}"
+                }
+                authentication {
+                    create<HttpHeaderAuthentication>("header")
                 }
             }
         }

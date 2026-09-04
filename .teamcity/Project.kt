@@ -145,8 +145,7 @@ object PublishToPluginPortal : AbstractBuildType({
         password("env.PGP_SIGNING_KEY_PASSPHRASE", "%pgpSigningPassphrase%")
 
         param("env.GRADLE_INTERNAL_REPO_URL", "%gradle.internal.repository.url%")
-        param("env.GRADLE_INTERNAL_REPO_USERNAME", "%gradle.internal.repository.build-tool.publish.username%")
-        password("env.GRADLE_INTERNAL_REPO_PASSWORD", "%gradle.internal.repository.build-tool.publish.password%")
+        password("env.GRADLE_INTERNAL_REPO_TOKEN", "%gradle.internal.repository.build-tool.publish.token%")
 
         param("env.GRADLE_PUBLISH_KEY", "%plugin.portal.publish.key%")
         param("env.GRADLE_PUBLISH_SECRET", "%plugin.portal.publish.secret%")
@@ -178,7 +177,6 @@ object ReleaseSnapshot : AbstractBuildType({
         password("env.PGP_SIGNING_KEY_PASSPHRASE", "%pgpSigningPassphrase%")
 
         param("env.GRADLE_INTERNAL_REPO_URL", "%gradle.internal.repository.url%")
-        param("env.GRADLE_INTERNAL_REPO_USERNAME", "%gradle.internal.repository.build-tool.publish.username%")
-        password("env.GRADLE_INTERNAL_REPO_PASSWORD", "%gradle.internal.repository.build-tool.publish.password%")
+        password("env.GRADLE_INTERNAL_REPO_TOKEN", "%gradle.internal.repository.build-tool.publish.token%")
     }
 })
